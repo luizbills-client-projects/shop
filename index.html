@@ -93,7 +93,7 @@
                                 ><button
                                     class="btn btn-outline-secondary minus-btn"
                                     type="button"
-                                    @click="updateQuantity(item, -1), calculateTotals()"
+                                    @click="updateQuantity(item, -1), calculateTotals(), sync()"
                                 >
                                     -</button
                                 ><input
@@ -104,7 +104,7 @@
                                 /><button
                                     class="btn btn-outline-secondary plus-btn"
                                     type="button"
-                                    @click="updateQuantity(item), calculateTotals()"
+                                    @click="updateQuantity(item), calculateTotals(), sync()"
                                 >
                                     +
                                 </button></span

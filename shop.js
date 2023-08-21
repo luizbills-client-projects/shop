@@ -64,11 +64,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         updateStorage() {
-            const items = {};
-            for (let i = 0; i < this.cart_items.length; i++) {
-                const item = this.cart_items[i];
-                items[item.id] = item.quantity;
-            }
+            const items = this.serializeCart();
             localStorage.setItem('shop_cart_items', JSON.stringify(items));
             console.log('local storage updated');
         },
@@ -82,6 +78,23 @@ document.addEventListener('alpine:init', () => {
                 if (!items[product.id]) continue;
                 product.quantity = items[product.id];
                 this.addCartItem(product);
+            }
+        },
+
+        serializeCart() {
+            const items = {};
+            for (let i = 0; i < this.cart_items.length; i++) {
+                const item = this.cart_items[i];
+                items[item.id] = item.quantity;
+            }
+            return items;
+        },
+
+        sync() {
+            const items = this.serializeCart();
+            for (const product of this.catalog) {
+                if (!items[product.id]) continue;
+                product.quantity = items[product.id];
             }
         },
     }));
