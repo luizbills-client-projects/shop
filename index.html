@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.0.2/css/bootstrap.min.css"
+        />
+        <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+        />
+
+        <style>
+            [x-cloak] {
+                display: none !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div x-data="shop" x-cloak>
+            <!-- catalogo de produtos-->
+            <div class="container">
+                <h1 class="mt-4">Lista de Produtos</h1>
+                <ul class="list-unstyled row">
+                    <template x-for="product in catalog">
+                        <li class="col-md-4 mb-4 produto1">
+                            <div class="card">
+                                <img
+                                    :src="product.image"
+                                    class="card-img-top"
+                                    :alt="product.name"
+                                />
+                                <div class="card-body">
+                                    <h2
+                                        class="card-title"
+                                        x-text="product.name"
+                                    ></h2>
+                                    <p
+                                        class="card-text"
+                                        x-text="formatPrice(product.price)"
+                                    ></p>
+                                    <div class="input-group mb-3">
+                                        <button
+                                            class="btn btn-outline-secondary minus-btn"
+                                            type="button"
+                                            @click="updateQuantity(product, -1)"
+                                        >
+                                            -
+                                        </button>
+                                        <input
+                                            type="number"
+                                            class="form-control quantity-input"
+                                            x-model="product.quantity"
+                                            min="1"
+                                            step="1"
+                                        />
+                                        <button
+                                            class="btn btn-outline-secondary plus-btn"
+                                            type="button"
+                                            @click="updateQuantity(product)"
+                                        >
+                                            +
+                                        </button>
+                                    </div>
+                                    <button
+                                        class="btn btn-primary buy-btn"
+                                        @click="addCartItem(product)"
+                                    >
+                                        Comprar
+                                    </button>
+                                </div>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+
+            <!-- Sidebar de carrinho -->
+            <div class="sidebar" id="cartSidebar">
+                <h3>Carrinho</h3>
+                <ul id="cartItems" class="list-unstyled">
+                    <li class="mb-2" x-show="cart_items.length === 0">
+                        Carrinho vazio.
+                    </li>
+                    <template x-for="item in cart_items">
+                        <li class="mb-2">
+                            <span x-text="item.name"></span> -
+                            <span class="cart-item-quantity"
+                                ><button
+                                    class="btn btn-outline-secondary minus-btn"
+                                    type="button"
+                                    @click="updateQuantity(item, -1), calculateTotals()"
+                                >
+                                    -</button
+                                ><input
+                                    type="number"
+                                    class="form-control cart-quantity-input"
+                                    :value="item.quantity"
+                                    min="1"
+                                /><button
+                                    class="btn btn-outline-secondary plus-btn"
+                                    type="button"
+                                    @click="updateQuantity(item), calculateTotals()"
+                                >
+                                    +
+                                </button></span
+                            >
+                            x
+                            <span x-text="formatPrice(item.price)"></span>
+                            <button
+                                class="btn btn-outline-secondary remove-btn"
+                                type="button"
+                                @click="removeCartItem(item.id)"
+                            >
+                                X
+                            </button>
+                        </li>
+                    </template>
+                </ul>
+                <div id="cartSummary">
+                    <p>
+                        <strong>Total de Itens:</strong>
+                        <span
+                            id="itemCount"
+                            x-text="cart_totals.quantity"
+                        ></span>
+                    </p>
+                    <p id="totalAmount">
+                        <strong>Total:</strong>
+                        <span x-text="formatPrice(cart_totals.total)"></span>
+                    </p>
+                    <button
+                        id="clearCart"
+                        class="btn btn-danger"
+                        @click="clearCart"
+                    >
+                        Limpar Carrinho
+                    </button>
+                    <button
+                        id="btn-checkout"
+                        class="btn btn-primary"
+                        @click="showCheckoutModal"
+                    >
+                        Adicionar Dados
+                    </button>
+                </div>
+            </div>
+
+            <div
+                class="modal fade"
+                id="modal-checkout"
+                tabindex="-1"
+                aria-labelledby="dataModalLabel"
+                aria-hidden="true"
+            >
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="dataModalLabel">
+                                Informe seus dados
+                            </h5>
+                            <button
+                                type="button"
+                                class="btn-close"
+                                data-bs-dismiss="modal"
+                                aria-label="Fechar"
+                            ></button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label"
+                                        >Nome Completo</label
+                                    >
+                                    <input
+                                        type="text"
+                                        class="form-control"
+                                        id="name"
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cpf" class="form-label"
+                                        >CPF</label
+                                    >
+                                    <input
+                                        type="cpf"
+                                        class="form-control"
+                                        id="cpf"
+                                        required
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label"
+                                        >Telefone</label
+                                    >
+                                    <input
+                                        type="tel"
+                                        class="form-control"
+                                        id="phone"
+                                        required
+                                    />
+                                </div>
+                                <div class="mb-3">
+                                    <label
+                                        for="paymentMethod"
+                                        class="form-label"
+                                        >Forma de Pagamento</label
+                                    >
+                                    <select
+                                        class="form-select"
+                                        id="paymentMethod"
+                                        required
+                                    >
+                                        <option value="">
+                                            Escolha uma opção
+                                        </option>
+                                        <option value="credito">
+                                            Cartão de Crédito
+                                        </option>
+                                        <option value="boleto">
+                                            Boleto à Vista
+                                        </option>
+                                        <option value="boleto_carencia">
+                                            Boleto em 5xs com carência de 90
+                                            dias
+                                        </option>
+                                        <option value="outros">Outros</option>
+                                    </select>
+                                </div>
+                            </form>
+                            <div class="alert alert-success mt-2" role="alert">
+                                <h3>resumo do pedido</h3>
+                                <div id="cartSummaryModal">
+                                    <p>
+                                        <strong>Total de Itens:</strong>
+                                        <span id="itemCount">0</span>
+                                    </p>
+                                    <p id="totalAmount">
+                                        <strong>Total:</strong> R$ 0.00
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button
+                                type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal"
+                            >
+                                Fechar
+                            </button>
+                            <a
+                                id="whatsappLink"
+                                href="#"
+                                target="_blank"
+                                class="btn btn-success"
+                                ><i class="fab fa-whatsapp"></i> Finalizar
+                                Pedido via WhatsApp</a
+                            >
+                            <a
+                                id="whatsappLink2"
+                                href="#"
+                                class="btn btn-success"
+                                >gravar</a
+                            >
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="shop.js" defer></script>
+        <script src="checkout.js" defer></script>
+        <script src="https://unpkg.com/alpinejs" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.1/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
+    </body>
+</html>
