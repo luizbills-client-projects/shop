@@ -235,12 +235,34 @@
                             <div class="alert alert-success mt-2" role="alert">
                                 <h3>resumo do pedido</h3>
                                 <div id="cartSummaryModal">
+                                    <ul class="list-unstyled">
+                                        <template x-for="item in cart_items">
+                                            <li class="mb-2">
+                                                <span x-text="item.name"></span>
+                                                x
+                                                <span
+                                                    x-text="item.quantity"
+                                                ></span>
+                                                - Total:
+                                                <span
+                                                    x-text="formatPrice(item.price * item.quantity)"
+                                                ></span>
+                                            </li>
+                                        </template>
+                                    </ul>
+                                    <hr />
                                     <p>
                                         <strong>Total de Itens:</strong>
-                                        <span id="itemCount">0</span>
+                                        <span
+                                            id="itemCount"
+                                            x-text="cart_totals.quantity"
+                                        ></span>
                                     </p>
                                     <p id="totalAmount">
-                                        <strong>Total:</strong> R$ 0.00
+                                        <strong>Total:</strong>
+                                        <span
+                                            x-text="formatPrice(cart_totals.total)"
+                                        ></span>
                                     </p>
                                 </div>
                             </div>
